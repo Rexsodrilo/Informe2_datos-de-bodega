@@ -1,0 +1,257 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+html, body {
+  height: 100%;
+  background-color: #f4f6f9;
+}
+
+/* ==========================================
+   ESTRUCTURA GENERAL (Escritorio)
+   ========================================== */
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* BARRA LATERAL */
+.sidebar {
+  width: 240px;
+  min-width: 240px;
+  background-color: #1e293b;
+  color: #fff;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.brand h2 { font-size: 1.4rem; color: #38bdf8; }
+.brand .subtext { font-size: 0.8rem; color: #94a3b8; }
+
+/* Pestañas principales */
+.main-tabs { display: flex; flex-direction: column; gap: 8px; }
+.main-tab {
+  background: #334155;
+  color: #cbd5e1;
+  border: none;
+  padding: 12px 14px;
+  border-radius: 6px;
+  text-align: left;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.main-tab:hover { background: #475569; color: #fff; }
+.main-tab.active { background: #38bdf8; color: #0f172a; }
+
+.channel-filter { display: flex; flex-direction: column; gap: 10px; }
+.channel-filter h3 { font-size: 0.9rem; text-transform: uppercase; color: #64748b; margin-bottom: 5px; }
+
+.btn-channel {
+  background: #334155;
+  color: #cbd5e1;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  text-align: left;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-channel:hover { background: #475569; color: #fff; }
+.btn-channel.active { background: #0284c7; color: #fff; font-weight: bold; }
+
+.file-loader { margin-top: auto; background: #0f172a; padding: 15px; border-radius: 8px; text-align: center; }
+.btn-upload { display: block; background: #16a34a; color: #fff; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; border: none; width: 100%; }
+.btn-upload:hover { background: #15803d; }
+.sync-info { margin-top: 8px; font-size: 0.75rem; color: #94a3b8; }
+.sync-warning { margin-top: 4px; font-size: 0.68rem; color: #64748b; font-style: italic; }
+
+/* CONTENIDO PRINCIPAL */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  height: 100vh;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.tab-view { display: none; flex-direction: column; height: 100%; overflow: hidden; }
+.tab-view.visible { display: flex; }
+
+.top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+  flex-shrink: 0;
+}
+
+.search-box input { width: 320px; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 0.9rem; }
+.search-box input:focus { border-color: #0284c7; }
+
+/* TABLERO KANBAN */
+.kanban-board {
+  display: flex;
+  gap: 15px;
+  flex: 1;
+  min-height: 0;
+}
+
+.kanban-column {
+  width: 320px;
+  min-width: 320px;
+  background: #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.column-header {
+  background: #cbd5e1;
+  padding: 12px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  flex-shrink: 0;
+}
+
+.col-title { display: flex; justify-content: space-between; align-items: center; }
+.col-title h3 { font-size: 1rem; color: #0f172a; }
+.badge-count { background: #0f172a; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
+.kpi-mini { margin-top: 6px; font-size: 0.75rem; color: #334155; display: flex; justify-content: space-between; border-top: 1px solid #94a3b8; padding-top: 4px; }
+
+.column-cards {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card { background: #fff; padding: 12px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid #0284c7; flex-shrink: 0; }
+.card-nv { font-weight: bold; color: #0284c7; cursor: pointer; display: inline-block; margin-bottom: 4px; font-size: 0.95rem; }
+.card-client { font-weight: 600; font-size: 0.85rem; color: #1e293b; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-field { font-size: 0.8rem; color: #64748b; margin-bottom: 2px; }
+.card-field strong { color: #334155; }
+.badge-ontime { display: inline-block; margin-top: 6px; padding: 2px 6px; background: #dcfce7; color: #15803d; font-size: 0.7rem; border-radius: 4px; font-weight: bold; }
+.row-quiebre { background: #fee2e2; }
+
+/* ==========================================
+   MÓDULO KPI
+   ========================================== */
+.kpi-header { flex-wrap: wrap; }
+.kpi-date-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.btn-toggle {
+  background: #e2e8f0; color: #334155; border: none; padding: 8px 14px;
+  border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem;
+}
+.btn-toggle.active { background: #0284c7; color: #fff; }
+#kpi-date-input { padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
+.kpi-range-label { font-size: 0.85rem; color: #475569; background: #e2e8f0; padding: 6px 12px; border-radius: 6px; }
+
+.kpi-layout { display: flex; flex: 1; min-height: 0; gap: 15px; }
+.kpi-panel { flex: 1; overflow-y: auto; background: #fff; border-radius: 8px; padding: 20px; }
+.kpi-panel h2 { color: #0f172a; margin-bottom: 12px; font-size: 1.2rem; }
+.kpi-panel h3 { color: #334155; margin: 18px 0 8px; font-size: 1rem; }
+.kpi-empty { color: #94a3b8; text-align: center; margin-top: 40px; }
+
+.kpi-menu {
+  width: 260px; min-width: 260px; background: #1e293b; border-radius: 8px;
+  padding: 12px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto;
+}
+.kpi-menu-item {
+  background: #334155; color: #cbd5e1; border: none; padding: 12px 14px;
+  border-radius: 6px; text-align: left; cursor: pointer; font-size: 0.85rem; font-weight: 500;
+}
+.kpi-menu-item:hover { background: #475569; color: #fff; }
+.kpi-menu-item.active { background: #38bdf8; color: #0f172a; font-weight: bold; }
+
+.kpi-card-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 10px; }
+.kpi-card {
+  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+  padding: 16px 20px; min-width: 200px;
+}
+.kpi-card-label { font-size: 0.78rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.03em; }
+.kpi-card-value { font-size: 1.8rem; font-weight: 700; color: #0f172a; margin: 4px 0; }
+.kpi-card-sub { font-size: 0.78rem; color: #94a3b8; }
+
+.chart-box { max-width: 720px; height: 320px; margin: 12px 0 20px; }
+
+.kpi-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 10px; }
+.kpi-table th { text-align: left; background: #f1f5f9; color: #334155; padding: 8px 10px; border-bottom: 2px solid #e2e8f0; }
+.kpi-table td { padding: 7px 10px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+.kpi-table tr:hover td { background: #f8fafc; }
+.tag-warning { background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+
+/* ==========================================
+   MÓDULO DETALLE
+   ========================================== */
+.detalle-count { font-size: 0.85rem; color: #64748b; margin-bottom: 10px; }
+.detalle-table-wrap { flex: 1; overflow: auto; background: #fff; border-radius: 8px; }
+.detalle-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.detalle-table thead th {
+  position: sticky; top: 0; background: #1e293b; color: #fff; text-align: left;
+  padding: 10px; white-space: nowrap;
+}
+.detalle-table td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; white-space: nowrap; }
+.detalle-table tr:hover td { background: #f8fafc; }
+
+#detalle-estado { padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; }
+.btn-export { background: #0284c7; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+.btn-export:hover { background: #0369a1; }
+
+/* ==========================================
+   MODAL DE CONTRASEÑA
+   ========================================== */
+.modal { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.6); align-items: center; justify-content: center; z-index: 100; }
+.modal.visible { display: flex; }
+.modal-box { background: #fff; padding: 28px; border-radius: 10px; width: 320px; }
+.modal-box h3 { color: #0f172a; margin-bottom: 6px; }
+.modal-box p { font-size: 0.85rem; color: #64748b; margin-bottom: 16px; }
+.modal-box input { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 14px; }
+.modal-actions .btn-upload { width: 100%; }
+.modal-error { color: #d9534f; font-size: 0.8rem; margin-top: 8px; min-height: 1em; }
+
+/* BARRAS DE DESPLAZAMIENTO */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #cbd5e1; border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: #0284c7; border-radius: 4px; }
+
+/* ==========================================
+   ADAPTATIVO / RESPONSIVE
+   ========================================== */
+@media screen and (max-width: 1024px) {
+  .sidebar { width: 200px; min-width: 200px; padding: 15px; }
+  .kanban-column { width: 280px; min-width: 280px; }
+  .kpi-menu { width: 200px; min-width: 200px; }
+}
+
+@media screen and (max-width: 768px) {
+  html, body { overflow: auto; height: auto; }
+  .app-container { flex-direction: column; height: auto; overflow: visible; }
+  .sidebar { width: 100%; min-width: 100%; height: auto; padding: 15px; }
+  .main-content { height: auto; overflow: visible; padding: 10px; }
+  .tab-view.visible { height: auto; }
+  .top-header { flex-direction: column; gap: 10px; align-items: stretch; }
+  .search-box input { width: 100%; }
+  .kanban-board { flex-direction: column; height: auto; gap: 20px; }
+  .kanban-column { width: 100%; min-width: 100%; height: 450px; }
+  .kpi-layout { flex-direction: column-reverse; }
+  .kpi-menu { width: 100%; min-width: 100%; flex-direction: row; flex-wrap: wrap; }
+  .detalle-table-wrap { overflow-x: auto; }
+}
