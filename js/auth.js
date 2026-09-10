@@ -16,7 +16,7 @@
 // del navegador en esta página y ejecuta:
 //   crypto.subtle.digest('SHA-256', new TextEncoder().encode('tu_clave'))
 //     .then(b => console.log([...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')))
-const UPLOAD_PASSWORD_HASH = '12345';
+const UPLOAD_PASSWORD_HASH = '5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5';
 
 async function sha256(text) {
   const enc = new TextEncoder().encode(text);
