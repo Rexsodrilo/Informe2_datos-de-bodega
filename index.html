@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard de Despachos</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- SheetJS: lectura de Excel en el navegador -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Chart.js: gráficos del módulo KPI -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+
+    <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Abrir menú">☰</button>
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- BARRA LATERAL -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <h2>Logística</h2>
+        <span class="subtext">Despachos y KPI</span>
+      </div>
+
+      <!-- Pestañas principales -->
+      <nav class="main-tabs">
+        <button class="main-tab active" data-tab="kanban">Kanban</button>
+        <button class="main-tab" data-tab="kpi">Indicadores (KPI)</button>
+        <button class="main-tab" data-tab="detalle">Detalle</button>
+      </nav>
+
+      <!-- Filtro de canal (solo aplica en Kanban) -->
+      <div class="channel-filter" id="kanban-channel-filter">
+        <h3>Canal de Venta</h3>
+        <button class="btn-channel active" data-channel="todos">Todos</button>
+        <button class="btn-channel" data-channel="a despachar">A Despachar</button>
+        <button class="btn-channel" data-channel="a retirar por cliente">A Retirar Cliente</button>
+        <button class="btn-channel" data-channel="ecommerce">Ecommerce</button>
+        <button class="btn-channel" data-channel="retail">Retail</button>
+        <button class="btn-channel btn-pendiente" data-channel="pendiente">⚠️ Pendientes</button>
+      </div>
+
+      <!-- Carga de datos (restringida) -->
+      <div class="file-loader">
+        <label for="excel-file" id="upload-label" class="btn-upload">📁 Actualizar datos</label>
+        <input type="file" id="excel-file" accept=".xls,.xlsx,.xlsm" style="display:none;">
+        <div id="sync-info" class="sync-info">Sin sincronizar</div>
+        <div id="data-status" class="data-status"></div>
+        <div class="sync-warning">Los datos son una fotografía puntual, no en tiempo real.</div>
+      </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+
+      <!-- VISTA: KANBAN -->
+      <section class="tab-view visible" id="view-kanban">
+        <header class="top-header">
+          <div class="search-box">
+            <input type="text" id="search-input" placeholder="🔍 Buscar por N° NV, cliente o vendedor...">
+          </div>
+        </header>
+
+        <section class="kanban-board">
+          <div class="kanban-column" id="col-entregado">
+            <div class="column-header">
+              <div class="col-title"><h3>Entregado / Concluido</h3><span class="badge-count" id="count-entregado">0</span></div>
+              <div class="kpi-mini"><div>Monto filtrado: <strong id="kpi-semana">$0</strong></div></div>
+            </div>
+            <div class="column-cards" id="cards-entregado"></div>
+          </div>
+
+          <div class="kanban-column" id="col-programado">
+            <div class="column-header"><div class="col-title"><h3>Programado</h3><span class="badge-count" id="count-programado">0</span></div></div>
+            <div class="column-cards" id="cards-programado"></div>
+          </div>
+
+          <div class="kanban-column" id="col-por-programar">
+            <div class="column-header"><div class="col-title"><h3>Por Programar</h3><span class="badge-count" id="count-por-programar">0</span></div></div>
+            <div class="column-cards" id="cards-por-programar"></div>
+          </div>
+
+          <div class="kanban-column" id="col-despacho">
+            <div class="column-header"><div class="col-title"><h3>En Despacho / Tránsito</h3><span class="badge-count" id="count-despacho">0</span></div></div>
+            <div class="column-cards" id="cards-despacho"></div>
+          </div>
+
+          <div class="kanban-column" id="col-pendiente">
+            <div class="column-header"><div class="col-title"><h3>Pendientes</h3><span class="badge-count" id="count-pendiente">0</span></div></div>
+            <div class="column-cards" id="cards-pendiente"></div>
+          </div>
+        </section>
+      </section>
+
+      <!-- VISTA: KPI -->
+      <section class="tab-view" id="view-kpi">
+        <header class="top-header kpi-header">
+          <div class="kpi-date-controls">
+            <button id="kpi-mode-dia" class="btn-toggle">Día</button>
+            <button id="kpi-mode-semana" class="btn-toggle active">Semana</button>
+            <button id="kpi-mode-mes" class="btn-toggle">Mes</button>
+            <input type="date" id="kpi-date-input">
+            <span class="kpi-range-label" id="kpi-range-label"></span>
+          </div>
+        </header>
+
+        <div class="kpi-layout">
+          <div class="kpi-panel" id="kpi-panel">
+            <p class="kpi-empty">Carga un archivo de datos para ver los indicadores.</p>
+          </div>
+          <nav class="kpi-menu" id="kpi-menu"></nav>
+        </div>
+      </section>
+
+      <!-- VISTA: DETALLE -->
+      <section class="tab-view" id="view-detalle">
+        <header class="top-header">
+          <div class="search-box">
+            <input type="text" id="detalle-search" placeholder="🔍 Buscar por N° NV, cliente o vendedor...">
+          </div>
+          <select id="detalle-estado">
+            <option value="todos">Todos los estados</option>
+            <option value="C">Concluido</option>
+            <option value="A">Aceptado</option>
+            <option value="P">Pendiente</option>
+          </select>
+          <button id="detalle-export" class="btn-export">⬇️ Exportar CSV</button>
+        </header>
+        <div class="detalle-count">NV encontradas: <strong id="detalle-count">0</strong></div>
+        <div class="detalle-table-wrap">
+          <table class="detalle-table">
+            <thead>
+              <tr>
+                <th>NV</th><th>Cliente</th><th>Vendedor</th><th>Canal</th><th>Estado</th>
+                <th>Monto</th><th>Fecha creación</th><th>Fecha compromiso</th>
+                <th>Fecha coordinada</th><th>Cumplimiento</th><th>Operador</th><th>Transportista</th>
+              </tr>
+            </thead>
+            <tbody id="detalle-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Modal de contraseña para carga de datos -->
+  <div class="modal" id="password-modal">
+    <div class="modal-box">
+      <h3>Acceso restringido</h3>
+      <p>Solo la persona responsable puede actualizar los datos.</p>
+      <input type="password" id="password-input" placeholder="Contraseña">
+      <div class="modal-actions">
+        <button id="password-submit" class="btn-upload">Ingresar</button>
+      </div>
+      <div class="modal-error" id="password-error"></div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
