@@ -119,10 +119,14 @@ function isYes(val) {
 }
 
 /** En esta planilla, "0" se usa como placeholder de "sin asignar" en varios
- * campos (Patente, Chofer, OP_Picking) — se trata igual que vacío. */
+ * campos (Patente, Chofer, OP_Picking), y "Sin datos" cumple el mismo rol en
+ * Guía/Factura — antes solo se detectaba "0", así que cualquier NV sin guía
+ * o sin factura se estaba leyendo como si SÍ tuviera (bug real, detectado
+ * revisando el archivo original). Ambos placeholders se tratan como vacío. */
 function emptyIfZero(val) {
   const s = (val ?? '').toString().trim();
-  return s === '0' ? '' : s;
+  if (s === '0' || s.toLowerCase() === 'sin datos') return '';
+  return s;
 }
 
 // ---------------------------------------------------------------------------
