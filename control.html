@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Sin link desde el menú del dashboard a propósito — página privada,
+       protegida con clave propia (ver js/authControl.js). -->
+  <title>Panel de control</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="styles.css?v=37">
+  <!-- SheetJS: solo para el botón "Exportar Excel" del detalle de Transporte. -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    /* Paleta azul marino / dorado del panel de control (pedida 2026-10-10,
+       sobre una foto de referencia) — independiente de la paleta cálida de
+       la barra lateral del dashboard público (ver styles.css). Solo vive
+       dentro de esta página: no toca los componentes compartidos
+       (.zone-box, .kpi-card, .pill-btn, etc.) en el dashboard público,
+       porque todas las reglas de abajo van scoped con ".control-page"/
+       ".control-login-wrap". */
+    :root {
+      --control-bg: #07070B;
+      --control-surface: #141A2E;
+      --control-accent: #1B3A6B;
+      --control-gold: #D4AF37;
+      --control-text: #E8EEF9;
+      --control-text-muted: #8691AE;
+      --control-border-light: #2E4068;
+      --control-border-dark: #050810;
+    }
+    /* html,body traen height:100% desde styles.css — con contenido más alto
+       que una pantalla, el fondo se cortaba ahí y se veía blanco debajo
+       (el bug que reportó el usuario). height:auto deja que la caja crezca
+       con el contenido; min-height asegura que cubra al menos la pantalla. */
+    html, body { height: auto; min-height: 100%; }
+    html { background: var(--control-bg); }
+    body { background: var(--control-bg); min-height: 100vh; }
+    .control-login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .control-login-wrap .modal-box { background: var(--control-surface); border: 1px solid var(--control-border-light); box-shadow: none; }
+    .control-login-wrap .modal-box h3 { color: var(--control-gold); }
+    .control-login-wrap .modal-box p { color: var(--control-text-muted); }
+    .control-login-wrap .modal-box input { background: var(--control-bg); border-color: var(--control-border-light); color: var(--control-text); }
+    .control-password-wrap { position: relative; }
+    .control-password-wrap input { padding-right: 38px; }
+    .control-password-toggle { position: absolute; right: 6px; top: 10px; background: none; border: none; cursor: pointer; color: var(--control-text-muted); font-size: 1.05rem; padding: 4px; line-height: 1; }
+    .control-password-toggle:hover { color: var(--control-gold); }
+    .control-login-wrap .btn-upload { background: var(--control-gold); color: #2B1E02; }
+    .control-login-wrap .btn-upload:hover { background: #E3C04E; }
+
+    .control-page { max-width: 1160px; margin: 0 auto; padding: 24px 16px 48px; }
+    .control-header { margin-bottom: var(--sp-4); }
+    .control-header h1 { font-size: 1.4rem; color: var(--control-gold); margin-bottom: 4px; }
+    .control-header p { color: var(--control-text-muted); font-size: 0.85rem; }
+
+    /* Filtro de fechas: los .sb-pill/.sb-*-select del dashboard público son
+       de la paleta de LA BARRA LATERAL (pensados para ese sidebar) — no la
+       de este panel, así que se usa .pill-btn y controles propios. */
+    .control-fecha-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    .control-fecha-input { display: block; width: 100%; margin-top: 8px; padding: 7px 9px; border: 1px solid var(--control-border-light); border-radius: var(--radius-sm); font-size: 0.8rem; color: var(--control-text); background: var(--control-bg); }
+    .control-fecha-input.hidden { display: none; }
+    .control-fecha-rango-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .control-fecha-rango-row label { font-size: 0.72rem; color: var(--control-text-muted); width: 34px; flex-shrink: 0; }
+    .control-fecha-rango-row .control-fecha-input { margin-top: 0; }
+    .control-fecha-badge { display: block; margin-top: 10px; font-size: 0.78rem; color: var(--control-text-muted); }
+
+    /* Filtro a la izquierda (columna fija), tarjetas a la derecha en
+       grilla — pedido 2026-10-10. En pantallas angostas se apila. */
+    .control-layout { display: flex; gap: 16px; align-items: start; }
+    .control-filtro-col { width: 230px; flex-shrink: 0; }
+    .control-cards-grid { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; align-items: start; }
+    .control-card--ancha { grid-column: 1 / -1; }
+    @media screen and (max-width: 760px) {
+      .control-layout { flex-direction: column; }
+      .control-filtro-col { width: 100%; }
+    }
+
+    /* Componentes compartidos (.zone-box/.kpi-card/.pill-btn/.kpi-table),
+       repintados para este panel sin tocar sus reglas base. */
+    .control-page .zone-box { background: var(--control-surface); border-color: var(--control-border-light); box-shadow: none; }
+    .control-page .control-card { padding: 12px 14px 11px; }
+    .control-page .np-canvas-title { color: var(--control-gold); font-size: 0.8rem; }
+    .control-page .control-desc-toggle { font-size: 0.68rem; padding: 4px 8px; }
+    .control-page .kpi-note { color: var(--control-text-muted); margin-top: 6px; }
+    .control-page .kpi-empty { color: var(--control-text-muted); }
+    .control-page .kpi-card { background: var(--control-accent); border: none; box-shadow: none; }
+    .control-page .kpi-card-label { color: var(--control-gold); }
+    .control-page .kpi-card-value { color: var(--control-text); }
+    .control-page .kpi-card-sub { color: var(--control-text-muted); }
+    .control-page .pill-btn { background: transparent; border-color: var(--control-border-light); color: var(--control-gold); }
+    .control-page .pill-btn:hover { background: var(--control-border-light); border-color: var(--control-border-light); }
+    .control-page .pill-btn.active { background: var(--control-gold); color: #412402; border-color: var(--control-gold); }
+    .control-page .kpi-table { color: var(--control-text); }
+    .control-page .kpi-table th { color: var(--control-text-muted); }
+    .control-page .kpi-table th, .control-page .kpi-table td { border-bottom-color: var(--control-border-light); }
+    .control-page .kpi-table tr:hover td { background: var(--control-accent); }
+    .control-page .kpi-table-scroll { border-color: var(--control-border-light); }
+    .control-page .kpi-table-scroll .kpi-table thead th { background: var(--control-surface); }
+
+    /* Tarjetas-resumen: borde en relieve (más claro arriba/izquierda, más
+       oscuro abajo/derecha) + se levantan un poco al pasar el mouse. Los
+       números principales tienen un brillo sutil y constante. */
+    .control-page .control-card {
+      border-top: 1px solid var(--control-border-light); border-left: 1px solid var(--control-border-light);
+      border-right: 1px solid var(--control-border-dark); border-bottom: 1px solid var(--control-border-dark);
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+    .control-page .control-card:hover { transform: translateY(-3px); background: var(--control-accent); }
+    @keyframes control-shimmer { 0%, 100% { opacity: 1; } 50% { opacity: 0.72; } }
+    .control-page .control-card .kpi-card-value { animation: control-shimmer 2.6s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+  <div class="control-login-wrap" id="control-login-wrap">
+    <div class="modal-box">
+      <h3>Panel de control</h3>
+      <p>Acceso restringido.</p>
+      <div class="control-password-wrap">
+        <input type="password" id="control-password-input" placeholder="Contraseña">
+        <button type="button" id="control-password-toggle" class="control-password-toggle" aria-label="Mostrar contraseña"><i class="ti ti-eye"></i></button>
+      </div>
+      <div class="modal-actions">
+        <button id="control-password-submit" class="btn-upload">Ingresar</button>
+      </div>
+      <div class="modal-error" id="control-password-error"></div>
+    </div>
+  </div>
+
+  <div class="control-page hidden" id="control-page">
+    <div class="control-header">
+      <h1>Panel de control</h1>
+      <p>Solo para uso interno — no es parte del dashboard público.</p>
+    </div>
+    <div id="control-body">
+      <p class="kpi-empty">Cargando…</p>
+    </div>
+  </div>
+
+  <script type="module" src="js/control.js?v=10"></script>
+</body>
+</html>
