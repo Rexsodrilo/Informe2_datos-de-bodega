@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Sin link desde el menú del dashboard a propósito — página privada,
+       protegida con clave propia (ver js/authControl.js). -->
+  <title>Panel de control</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="styles.css?v=36">
+  <!-- SheetJS: solo para el botón "Exportar Excel" del detalle de Transporte. -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    body { background: var(--bg); min-height: 100vh; }
+    .control-login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .control-page { max-width: 1100px; margin: 0 auto; padding: 24px 16px 48px; }
+    .control-header { margin-bottom: var(--sp-4); }
+    .control-header h1 { font-size: 1.4rem; color: var(--text); margin-bottom: 4px; }
+    .control-header p { color: var(--text-secondary); font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <div class="control-login-wrap" id="control-login-wrap">
+    <div class="modal-box">
+      <h3>Panel de control</h3>
+      <p>Acceso restringido.</p>
+      <input type="password" id="control-password-input" placeholder="Contraseña">
+      <div class="modal-actions">
+        <button id="control-password-submit" class="btn-upload">Ingresar</button>
+      </div>
+      <div class="modal-error" id="control-password-error"></div>
+    </div>
+  </div>
+
+  <div class="control-page hidden" id="control-page">
+    <div class="control-header">
+      <h1>Panel de control</h1>
+      <p>Solo para uso interno — no es parte del dashboard público.</p>
+    </div>
+    <div id="control-body">
+      <p class="kpi-empty">Cargando…</p>
+    </div>
+  </div>
+
+  <script type="module" src="js/control.js?v=5"></script>
+</body>
+</html>
